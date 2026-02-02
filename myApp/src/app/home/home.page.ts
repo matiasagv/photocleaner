@@ -1,12 +1,12 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { IonicModule } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
 import { SwipeCardDirective } from '../directives/swipe-card';
+import { Media } from '@capacitor-community/media';
 
-interface Foto {
-  id: number;
-  src: string;
-  name: string;
+interface FotoReal {
+  id: string; // El ID real de la foto en Android
+  src: string; // La ruta para mostrarla
 }
 
 @Component({
@@ -16,36 +16,64 @@ interface Foto {
   standalone: true,
   imports: [IonicModule, CommonModule, SwipeCardDirective],
 })
-export class HomePage {
-  // Simulación de fotos locales. 
-  // En producción usarías @capacitor-community/media para traer fotos reales.
-  fotos: Foto[] = [
-    { id: 1, src: 'https://picsum.photos/300/500?random=1', name: 'Vacaciones' },
-    { id: 2, src: 'https://picsum.photos/300/500?random=2', name: 'Comida' },
-    { id: 3, src: 'https://picsum.photos/300/500?random=3', name: 'Selfie' },
-  ];
+export class HomePage implements OnInit {
+  fotos: FotoReal[] = [];
+  cargando = true;
 
   constructor() {}
 
-  handleChoice(decision: 'borrar' | 'guardar', foto: Foto) {
+  ngOnInit() {
+    this.cargarFotosReales();
+  }
+
+  async cargarFotosReales() {
+    try {
+      // Pedimos permiso si es la primera vez
+      await Media.requestPermissions();
+      
+      // Traemos las últimas 50 fotos
+      const respuesta = await Media.getMedias({
+        quantity: 50,
+        sort: 'creationDate'
+      });
+
+      // Transformamos los datos para que nuestra app los entienda
+      // webPath es una URL especial para ver fotos locales en Ionic
+      this.fotos = respuesta.medias.map(media => ({
+        id: media.identifier,
+        src: media.webPath 
+      }));
+      
+      this.cargando = false;
+    } catch (error) {
+      console.error('Error cargando fotos:', error);
+      this.cargando = false;
+    }
+  }
+
+  handleChoice(decision: 'borrar' | 'guardar', foto: FotoReal) {
     if (decision === 'guardar') {
-      console.log('Foto guardada (No hacer nada):', foto.name);
+      console.log('Conservada:', foto.id);
     } else {
       this.borrarFoto(foto);
     }
-
-    // Remover la foto del array visualmente
+    // Quitamos la foto de la pantalla
     this.fotos = this.fotos.filter(f => f.id !== foto.id);
   }
 
-  async borrarFoto(foto: Foto) {
-    console.log('Moviendo a papelera:', foto.name);
-    
-    // AQUÍ VA LA LÓGICA DE CAPACITOR
-    // Ejemplo conceptual con plugin Media:
-    // await Media.deletePhotos({ identifiers: [foto.id] });
-    
-    // Nota: Android mostrará un popup nativo preguntando:
-    // "¿Permitir a [TuApp] mover este elemento a la papelera?"
+  async borrarFoto(foto: FotoReal) {
+    try {
+      console.log('Intentando borrar:', foto.id);
+      
+      // ESTO ES LO QUE BORRA REALMENTE
+      // En Android 11+ saldrá un popup del sistema pidiendo confirmación
+      await Media.deleteMedias({
+        identifiers: [foto.id]
+      });
+      
+    } catch (error) {
+      console.error('No se pudo borrar:', error);
+      // Opcional: Si falla (ej: usuario cancela), podrías volver a poner la foto en el array
+    }
   }
 }
