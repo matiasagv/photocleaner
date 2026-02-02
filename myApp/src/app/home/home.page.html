@@ -1,12 +1,13 @@
 <ion-content [fullscreen]="true" class="premium-bg">
   
   <div class="top-bar">
-    <div class="logo">
-      <ion-icon name="sparkles" color="primary"></ion-icon>
+    <div class="header-btn" (click)="abrirSelectorAlbums()">
+      <ion-icon name="grid-outline"></ion-icon>
       <span>{{ albumActualNombre }}</span>
     </div>
+
     <div class="counter" *ngIf="fotos.length > 0">
-      {{ fotos.length }} fotos
+      {{ fotos.length }}
     </div>
   </div>
 
@@ -54,8 +55,8 @@
 
   <div class="action-buttons" *ngIf="!cargando && fotos.length > 0">
     
-    <button class="btn-action album-selector" (click)="abrirSelectorAlbums()">
-      <ion-icon name="albums-outline"></ion-icon>
+    <button class="btn-action rewind" (click)="deshacer()" [disabled]="historial.length === 0">
+      <ion-icon name="arrow-undo"></ion-icon>
     </button>
 
     <button class="btn-action delete" (click)="handleChoice('borrar', fotos[fotos.length - 1])">

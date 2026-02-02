@@ -21,19 +21,20 @@ interface FotoReal {
 })
 export class HomePage implements OnInit {
   fotos: FotoReal[] = [];
-  albums: any[] = []; // Lista de álbumes del celular
+  albums: any[] = []; 
+  historial: FotoReal[] = []; // <--- ¡ESTO ES LO QUE FALTABA!
   
   cargando = false;
-  mostrarModalAlbums = false; // Controla si se ve la lista de álbumes
-  albumActualNombre = 'Recientes'; // Para saber qué estamos viendo
+  mostrarModalAlbums = false;
+  albumActualNombre = 'Recientes';
 
   constructor(private platform: Platform) {}
 
   ngOnInit() {
-    this.cargarFotosReales(); // Carga general al inicio
+    this.cargarFotosReales();
   }
 
-  // --- LÓGICA DE ÁLBUMES ---
+  // --- 1. LÓGICA DE ÁLBUMES ---
 
   async abrirSelectorAlbums() {
     this.cargando = true;
@@ -52,7 +53,6 @@ export class HomePage implements OnInit {
     }
 
     try {
-      // Pedimos los álbumes reales al celular
       const res = await Media.getAlbums();
       this.albums = res.albums;
       this.mostrarModalAlbums = true;
@@ -63,21 +63,20 @@ export class HomePage implements OnInit {
   }
 
   seleccionarAlbum(album: any) {
-    console.log('Álbum seleccionado:', album.name);
     this.albumActualNombre = album.name;
-    this.mostrarModalAlbums = false; // Cerramos el menú
-    this.cargarFotosReales(album.identifier); // Cargamos fotos de ESE álbum
+    this.mostrarModalAlbums = false;
+    this.cargarFotosReales(album.identifier);
   }
 
-  // --- CARGA DE FOTOS (Ahora acepta un ID de álbum opcional) ---
+  // --- 2. CARGA DE FOTOS ---
 
   async cargarFotosReales(albumId?: string) {
     this.cargando = true;
-    this.fotos = []; // Limpiamos lo que había antes
+    this.fotos = [];
+    this.historial = []; // Limpiamos historial al cambiar de álbum
 
-    // 1. MODO WEB (PC)
+    // MODO WEB (PC)
     if (!this.platform.is('hybrid')) {
-      // Simulamos carga
       setTimeout(() => {
         this.fotos = [
           { id: '1', src: 'https://picsum.photos/400/600?random=' + Math.random(), size: 2500000, sizeStr: '2.5 MB' },
@@ -89,15 +88,15 @@ export class HomePage implements OnInit {
       return;
     }
 
-    // 2. MODO REAL (CELULAR)
+    // MODO REAL (CELULAR)
     try {
-      // Opciones de consulta
+      await (Media as any).requestPermissions();
+      
       const opciones: any = {
         quantity: 50,
         sort: 'creationDate'
       };
 
-      // Si nos pasaron un álbum específico, lo agregamos al filtro
       if (albumId) {
         opciones.albumIdentifier = albumId;
       }
@@ -117,16 +116,31 @@ export class HomePage implements OnInit {
     this.cargando = false;
   }
 
-  // --- LÓGICA DE SWIPE (Igual que antes) ---
+  // --- 3. SWIPE Y ACCIONES ---
 
   handleChoice(decision: 'borrar' | 'guardar', foto: FotoReal) {
+    // 1. Guardamos en historial para poder deshacer
+    this.historial.push(foto);
+
     if (decision === 'borrar') {
       this.borrarFoto(foto);
     }
+    
+    // Quitamos la foto de la vista
     this.fotos = this.fotos.filter(f => f.id !== foto.id);
 
     if (this.fotos.length === 0) {
       this.lanzarConfetti();
+    }
+  }
+
+  // --- 4. FUNCIÓN DESHACER (LA QUE FALTABA) ---
+  deshacer() {
+    if (this.historial.length > 0) {
+      const ultimaFoto = this.historial.pop(); // Sacamos la última del historial
+      if (ultimaFoto) {
+        this.fotos.push(ultimaFoto); // La devolvemos a la pila
+      }
     }
   }
 

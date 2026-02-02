@@ -1,203 +1,116 @@
-// 1. FONDO Y ESTRUCTURA GENERAL
-.premium-bg {
-  --background: #f8f9fa; // Gris muy suave y limpio
+// 1. ESTRUCTURA Y FONDO
+.premium-bg { 
+  --background: #f8f9fa; // Gris muy suave
 }
 
+// BARRA SUPERIOR (ACTUALIZADA: Con botón de Álbumes)
 .top-bar {
   position: absolute;
-  top: 40px; 
-  left: 20px;
-  right: 20px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  z-index: 100;
+  top: 40px; left: 20px; right: 20px;
+  display: flex; justify-content: space-between; align-items: center; z-index: 100;
+  
+  // Botón del Álbum (Izquierda)
+  .header-btn {
+    display: flex; align-items: center; gap: 8px; 
+    background: white; padding: 8px 16px; border-radius: 20px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    cursor: pointer; transition: transform 0.2s;
+    
+    ion-icon { font-size: 1.2rem; color: #333; }
+    span { 
+      font-weight: 700; font-size: 0.9rem; color: #333;
+      max-width: 120px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; 
+    }
 
-  .logo {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-weight: 700;
-    font-size: 1.2rem;
-    color: #333;
+    &:active { transform: scale(0.95); }
   }
 
-  .counter {
-    background: rgba(0, 0, 0, 0.05);
-    padding: 6px 12px;
-    border-radius: 20px;
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: #666;
+  // Contador (Derecha)
+  .counter { 
+    background: rgba(0,0,0,0.6); backdrop-filter: blur(4px);
+    padding: 6px 12px; border-radius: 20px; 
+    font-size: 0.85rem; font-weight: 600; color: white; 
   }
 }
 
 .stack-container {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  overflow: hidden;
+  position: relative; width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; overflow: hidden;
 }
 
-// 2. DISEÑO DE LAS CARTAS
+// 2. ESTADO DE CARGA (SPINNER)
+.loading-state {
+  text-align: center; color: #666;
+  ion-spinner { transform: scale(1.5); margin-bottom: 10px; }
+}
+
+// 3. DISEÑO DE LAS CARTAS
 .card-wrapper {
-  position: absolute;
-  width: 90%;
-  max-width: 400px;
-  height: 65vh; // Altura de la carta
-  transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-  
-  &.disabled-card {
-    pointer-events: none;
-    transform: scale(0.95) translateY(10px); 
-    opacity: 0.5;
-  }
+  position: absolute; width: 90%; max-width: 400px; height: 65vh; transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  &.disabled-card { pointer-events: none; transform: scale(0.95) translateY(10px); opacity: 0.5; }
 }
 
 .photo-card {
-  width: 100%;
-  height: 100%;
-  background: white;
-  border-radius: 24px;
-  overflow: hidden;
-  box-shadow: 0 20px 40px -10px rgba(0,0,0,0.15);
-  position: relative;
-
-  img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    pointer-events: none;
-  }
-
-  // Sombra negra abajo para que se lea el texto
-  .card-overlay {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    height: 30%;
-    background: linear-gradient(to top, rgba(0,0,0,0.6), transparent);
-    display: flex;
-    align-items: flex-end;
-    padding: 20px;
-  }
-}
-
-// 3. BADGES (PESO DE LA FOTO)
-.info-row {
-  width: 100%;
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
-}
-
-.photo-badge {
-  color: white;
-  font-size: 0.85rem;
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  backdrop-filter: blur(10px);
-  background: rgba(0, 0, 0, 0.4);
-  padding: 8px 14px;
-  border-radius: 20px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  width: 100%; height: 100%; background: white; border-radius: 24px; overflow: hidden; box-shadow: 0 20px 40px -10px rgba(0,0,0,0.15); position: relative;
+  img { width: 100%; height: 100%; object-fit: cover; pointer-events: none; }
   
-  &.size-badge {
-    background: rgba(255, 193, 7, 0.2); // Amarillo transparente
-    color: #ffca28;
-    border-color: rgba(255, 193, 7, 0.3);
+  .card-overlay {
+    position: absolute; bottom: 0; left: 0; width: 100%; height: 30%;
+    background: linear-gradient(to top, rgba(0,0,0,0.6), transparent);
+    display: flex; align-items: flex-end; padding: 20px;
   }
 }
 
-// 4. BOTONES DE ACCIÓN
+// 4. BADGES (PESO DE LA FOTO)
+.info-row { width: 100%; display: flex; justify-content: space-between; align-items: flex-end; }
+.photo-badge {
+  color: white; font-size: 0.85rem; font-weight: 600; display: flex; align-items: center; gap: 6px;
+  backdrop-filter: blur(10px); background: rgba(0,0,0,0.4); padding: 8px 14px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1);
+  &.size-badge { background: rgba(255, 193, 7, 0.2); color: #ffca28; border-color: rgba(255, 193, 7, 0.3); }
+}
+
+// 5. BOTONES DE ACCIÓN (ACTUALIZADO: Con Rewind, Delete y Keep)
 .action-buttons {
-  position: absolute;
-  bottom: 30px;
-  width: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 25px;
-  z-index: 100;
+  position: absolute; bottom: 30px; width: 100%; display: flex; justify-content: center; align-items: center; gap: 25px; z-index: 100;
 
   .btn-action {
-    width: 64px;
-    height: 64px;
-    border-radius: 50%;
-    border: none;
-    background: white;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 28px;
-    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
-    transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    cursor: pointer;
-
+    width: 64px; height: 64px; border-radius: 50%; border: none; background: white;
+    display: flex; justify-content: center; align-items: center; font-size: 28px;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1); transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); cursor: pointer;
+    ion-icon { font-size: 1em; pointer-events: none; } // Fix para que se vea el icono
     &:active { transform: scale(0.9); }
 
-    // Botón deshacer (pequeño a la izquierda)
+    // BOTÓN REWIND (DESHACER - IZQUIERDA)
     &.rewind {
-      width: 45px;
-      height: 45px;
-      font-size: 20px;
-      color: #f5a623;
+      width: 50px; height: 50px; font-size: 22px; 
+      color: #f39c12; // Naranja
       background: #fff;
-      position: absolute;
-      left: 30px;
+      position: absolute; left: 30px;
       box-shadow: 0 5px 15px rgba(0,0,0,0.05);
       
-      &:disabled {
-        opacity: 0.4;
-        filter: grayscale(100%);
-      }
+      &:disabled { opacity: 0.4; filter: grayscale(100%); }
     }
 
-    // AQUI ESTÁN TUS CAMBIOS INTEGRADOS:
-    
-    // Botón Borrar (X Roja)
-    &.delete {
-      color: #ff4b4b; 
-      font-size: 32px; 
-    }
-
-    // Botón Guardar (Tick Verde)
-    &.keep {
-      color: #2ecc71; 
-      font-size: 32px; 
-    }
+    // BOTONES PRINCIPALES
+    &.delete { color: #ff4b4b; font-size: 32px; }
+    &.keep { color: #2ecc71; font-size: 32px; }
   }
 }
 
-// 5. PANTALLA DE "TODO LIMPIO"
+// 6. ESTILOS DE LA LISTA DE ÁLBUMES (MODAL)
+.album-item {
+  margin-bottom: 8px; border-radius: 12px; --background: #f1f3f5;
+  ion-icon { font-size: 24px; margin-right: 10px; }
+}
+
+// 7. PANTALLA DE "TODO LIMPIO"
 .empty-state {
-  text-align: center;
-  color: #888;
-  
+  text-align: center; color: #888;
   .circle-icon {
-    width: 80px;
-    height: 80px;
-    background: #e0e0e0;
-    border-radius: 50%;
-    margin: 0 auto 20px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 40px;
-    color: white;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    cursor: pointer;
-    transition: transform 0.2s;
-    
+    width: 80px; height: 80px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 50%; margin: 0 auto 20px; display: flex; justify-content: center; align-items: center;
+    font-size: 40px; color: white; cursor: pointer; transition: transform 0.2s;
     &:active { transform: scale(0.95); }
   }
-
   h3 { margin: 0; color: #333; font-weight: 700; }
   p { margin: 10px 0 20px; }
 }
