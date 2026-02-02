@@ -3,59 +3,93 @@
   <div class="top-bar">
     <div class="logo">
       <ion-icon name="sparkles" color="primary"></ion-icon>
-      <span>CleanGallery</span>
+      <span>{{ albumActualNombre }}</span>
     </div>
     <div class="counter" *ngIf="fotos.length > 0">
-      {{ fotos.length }} restantes
+      {{ fotos.length }} fotos
     </div>
   </div>
 
   <div class="stack-container">
     
-    <div *ngIf="fotos.length === 0" class="empty-state">
-      <div class="circle-icon" (click)="lanzarConfetti()"> <ion-icon name="checkmark-done"></ion-icon>
-      </div>
-      <h3>¡Todo limpio!</h3>
-      <p>Has recuperado espacio en tu celular.</p>
-      <ion-button fill="clear" (click)="cargarFotosReales()">Cargar más fotos</ion-button>
+    <div *ngIf="cargando" class="loading-state">
+      <ion-spinner name="crescent" color="primary"></ion-spinner>
+      <p>Buscando fotos...</p>
     </div>
 
-    <div 
-      class="card-wrapper" 
-      *ngFor="let foto of fotos; let i = index"
-      [style.z-index]="i"
-      appSwipeCard
-      (choiceMade)="handleChoice($event, foto)"
-      [class.disabled-card]="i !== fotos.length - 1" 
-    >
-      <div class="photo-card">
-        <img [src]="foto.src" />
-        
-        <div class="card-overlay">
-          <div class="info-row">
-            <div class="photo-badge size-badge">
-              <ion-icon name="server-outline"></ion-icon> {{ foto.sizeStr }}
+    <div *ngIf="!cargando && fotos.length === 0" class="empty-state">
+      <div class="circle-icon" (click)="lanzarConfetti()">
+        <ion-icon name="checkmark-done"></ion-icon>
+      </div>
+      <h3>{{ albumActualNombre }} limpio</h3>
+      <p>Selecciona otro álbum para continuar.</p>
+      <ion-button fill="outline" shape="round" (click)="abrirSelectorAlbums()">
+        Cambiar Álbum
+      </ion-button>
+    </div>
+
+    <ng-container *ngIf="!cargando">
+      <div 
+        class="card-wrapper" 
+        *ngFor="let foto of fotos; let i = index"
+        [style.z-index]="i"
+        appSwipeCard
+        (choiceMade)="handleChoice($event, foto)"
+        [class.disabled-card]="i !== fotos.length - 1" 
+      >
+        <div class="photo-card">
+          <img [src]="foto.src" />
+          <div class="card-overlay">
+            <div class="info-row">
+              <div class="photo-badge size-badge">
+                <ion-icon name="server-outline"></ion-icon> {{ foto.sizeStr }}
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
+    </ng-container>
+
   </div>
 
-  <div class="action-buttons" *ngIf="fotos.length > 0">
+  <div class="action-buttons" *ngIf="!cargando && fotos.length > 0">
     
-    <button class="btn-action rewind" (click)="deshacer()" [disabled]="historial.length === 0">
-      <ion-icon name="refresh"></ion-icon>
+    <button class="btn-action album-selector" (click)="abrirSelectorAlbums()">
+      <ion-icon name="albums-outline"></ion-icon>
     </button>
 
     <button class="btn-action delete" (click)="handleChoice('borrar', fotos[fotos.length - 1])">
-      <ion-icon name="trash-outline"></ion-icon>
+      <ion-icon name="close-outline"></ion-icon>
     </button>
 
     <button class="btn-action keep" (click)="handleChoice('guardar', fotos[fotos.length - 1])">
-      <ion-icon name="heart"></ion-icon>
+      <ion-icon name="checkmark-outline"></ion-icon>
     </button>
 
   </div>
+
+  <ion-modal [isOpen]="mostrarModalAlbums" (didDismiss)="mostrarModalAlbums = false" [initialBreakpoint]="0.6" [breakpoints]="[0, 0.6, 1]">
+    <ng-template>
+      <ion-header>
+        <ion-toolbar>
+          <ion-title>Tus Álbumes</ion-title>
+          <ion-buttons slot="end">
+            <ion-button (click)="mostrarModalAlbums = false">Cerrar</ion-button>
+          </ion-buttons>
+        </ion-toolbar>
+      </ion-header>
+      <ion-content class="ion-padding">
+        <ion-list lines="none">
+          <ion-item *ngFor="let album of albums" (click)="seleccionarAlbum(album)" button detail="true" class="album-item">
+            <ion-icon name="folder-open-outline" slot="start" color="warning"></ion-icon>
+            <ion-label>
+              <h2>{{ album.name }}</h2>
+              <p>{{ album.count }} fotos</p>
+            </ion-label>
+          </ion-item>
+        </ion-list>
+      </ion-content>
+    </ng-template>
+  </ion-modal>
 
 </ion-content>

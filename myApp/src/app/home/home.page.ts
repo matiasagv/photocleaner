@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { IonicModule, Platform } from '@ionic/angular'; // <--- OJO: Agregamos Platform
+import { IonicModule, Platform } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
 import { SwipeCardDirective } from '../directives/swipe-card';
 import { Media } from '@capacitor-community/media';
@@ -21,34 +21,88 @@ interface FotoReal {
 })
 export class HomePage implements OnInit {
   fotos: FotoReal[] = [];
-  historial: FotoReal[] = [];
-  cargando = true;
+  albums: any[] = []; // Lista de álbumes del celular
+  
+  cargando = false;
+  mostrarModalAlbums = false; // Controla si se ve la lista de álbumes
+  albumActualNombre = 'Recientes'; // Para saber qué estamos viendo
 
-  // Inyectamos Platform para saber si estamos en PC o Celular
   constructor(private platform: Platform) {}
 
   ngOnInit() {
-    this.cargarFotosReales();
+    this.cargarFotosReales(); // Carga general al inicio
   }
 
-  async cargarFotosReales() {
-    // 1. SI ESTAMOS EN LA WEB (PC), USAMOS DATOS FALSOS
+  // --- LÓGICA DE ÁLBUMES ---
+
+  async abrirSelectorAlbums() {
+    this.cargando = true;
+    
+    // Si es PC (Web), inventamos álbumes
     if (!this.platform.is('hybrid')) {
-      console.log('Modo Web detectado: Cargando fotos falsas');
-      this.fotos = [
-        { id: '1', src: 'https://picsum.photos/400/600?random=1', size: 2500000, sizeStr: '2.5 MB' },
-        { id: '2', src: 'https://picsum.photos/400/600?random=2', size: 1200000, sizeStr: '1.2 MB' },
-        { id: '3', src: 'https://picsum.photos/400/600?random=3', size: 5800000, sizeStr: '5.8 MB' },
-        { id: '4', src: 'https://picsum.photos/400/600?random=4', size: 3100000, sizeStr: '3.1 MB' },
+      this.albums = [
+        { name: 'Cámara', identifier: '1', count: 120 },
+        { name: 'WhatsApp', identifier: '2', count: 500 },
+        { name: 'Instagram', identifier: '3', count: 45 },
+        { name: 'Screenshots', identifier: '4', count: 12 }
       ];
+      this.mostrarModalAlbums = true;
       this.cargando = false;
       return;
     }
 
-    // 2. SI ESTAMOS EN CELULAR, USAMOS LA GALERÍA REAL
     try {
-      await (Media as any).requestPermissions();
-      const respuesta = await Media.getMedias({ quantity: 50, sort: 'creationDate' });
+      // Pedimos los álbumes reales al celular
+      const res = await Media.getAlbums();
+      this.albums = res.albums;
+      this.mostrarModalAlbums = true;
+    } catch (error) {
+      console.error('Error al traer álbumes', error);
+    }
+    this.cargando = false;
+  }
+
+  seleccionarAlbum(album: any) {
+    console.log('Álbum seleccionado:', album.name);
+    this.albumActualNombre = album.name;
+    this.mostrarModalAlbums = false; // Cerramos el menú
+    this.cargarFotosReales(album.identifier); // Cargamos fotos de ESE álbum
+  }
+
+  // --- CARGA DE FOTOS (Ahora acepta un ID de álbum opcional) ---
+
+  async cargarFotosReales(albumId?: string) {
+    this.cargando = true;
+    this.fotos = []; // Limpiamos lo que había antes
+
+    // 1. MODO WEB (PC)
+    if (!this.platform.is('hybrid')) {
+      // Simulamos carga
+      setTimeout(() => {
+        this.fotos = [
+          { id: '1', src: 'https://picsum.photos/400/600?random=' + Math.random(), size: 2500000, sizeStr: '2.5 MB' },
+          { id: '2', src: 'https://picsum.photos/400/600?random=' + Math.random(), size: 1200000, sizeStr: '1.2 MB' },
+          { id: '3', src: 'https://picsum.photos/400/600?random=' + Math.random(), size: 5800000, sizeStr: '5.8 MB' },
+        ];
+        this.cargando = false;
+      }, 500);
+      return;
+    }
+
+    // 2. MODO REAL (CELULAR)
+    try {
+      // Opciones de consulta
+      const opciones: any = {
+        quantity: 50,
+        sort: 'creationDate'
+      };
+
+      // Si nos pasaron un álbum específico, lo agregamos al filtro
+      if (albumId) {
+        opciones.albumIdentifier = albumId;
+      }
+
+      const respuesta = await Media.getMedias(opciones);
 
       this.fotos = respuesta.medias.map((media: any) => ({
         id: media.identifier,
@@ -57,23 +111,15 @@ export class HomePage implements OnInit {
         sizeStr: this.formatBytes(media.size)
       }));
       
-      this.cargando = false;
     } catch (error) {
       console.error('Error cargando fotos:', error);
-      this.cargando = false;
     }
+    this.cargando = false;
   }
 
-  formatBytes(bytes: number, decimals = 1) {
-    if (!bytes) return '0 B';
-    const k = 1024;
-    const sizes = ['B', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(decimals ? decimals : 1)) + ' ' + sizes[i];
-  }
+  // --- LÓGICA DE SWIPE (Igual que antes) ---
 
   handleChoice(decision: 'borrar' | 'guardar', foto: FotoReal) {
-    this.historial.push(foto);
     if (decision === 'borrar') {
       this.borrarFoto(foto);
     }
@@ -84,22 +130,21 @@ export class HomePage implements OnInit {
     }
   }
 
-  deshacer() {
-    if (this.historial.length > 0) {
-      const ultimaFoto = this.historial.pop();
-      if (ultimaFoto) this.fotos.push(ultimaFoto);
-    }
-  }
-
   async borrarFoto(foto: FotoReal) {
-    // En web no hacemos nada real
     if (!this.platform.is('hybrid')) return;
-
     try {
       await (Media as any).deleteMedias({ identifiers: [foto.id] });
     } catch (error) {
       console.error('Error al borrar');
     }
+  }
+
+  formatBytes(bytes: number, decimals = 1) {
+    if (!bytes) return '0 B';
+    const k = 1024;
+    const sizes = ['B', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(decimals ? decimals : 1)) + ' ' + sizes[i];
   }
 
   lanzarConfetti() {

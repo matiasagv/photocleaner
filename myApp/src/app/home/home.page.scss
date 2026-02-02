@@ -159,8 +159,19 @@
       }
     }
 
-    &.delete { color: #ff4b4b; }
-    &.keep { color: #2fe09d; font-size: 32px; }
+    // AQUI ESTÁN TUS CAMBIOS INTEGRADOS:
+    
+    // Botón Borrar (X Roja)
+    &.delete {
+      color: #ff4b4b; 
+      font-size: 32px; 
+    }
+
+    // Botón Guardar (Tick Verde)
+    &.keep {
+      color: #2ecc71; 
+      font-size: 32px; 
+    }
   }
 }
 
