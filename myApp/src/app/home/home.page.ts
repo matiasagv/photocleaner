@@ -22,16 +22,26 @@ interface FotoReal {
 export class HomePage implements OnInit {
   fotos: FotoReal[] = [];
   albums: any[] = []; 
-  historial: FotoReal[] = []; // <--- ¡ESTO ES LO QUE FALTABA!
+  historial: FotoReal[] = [];
   
   cargando = false;
   mostrarModalAlbums = false;
   albumActualNombre = 'Recientes';
 
+  // --- VARIABLES PARA EL ZOOM (NUEVO) ---
+  verZoom = false;
+  fotoZoom: FotoReal | null = null;
+
   constructor(private platform: Platform) {}
 
   ngOnInit() {
     this.cargarFotosReales();
+  }
+
+  // --- 0. FUNCIÓN PARA ABRIR ZOOM (NUEVO) ---
+  abrirZoom(foto: FotoReal) {
+    this.fotoZoom = foto;
+    this.verZoom = true;
   }
 
   // --- 1. LÓGICA DE ÁLBUMES ---
@@ -134,7 +144,7 @@ export class HomePage implements OnInit {
     }
   }
 
-  // --- 4. FUNCIÓN DESHACER (LA QUE FALTABA) ---
+  // --- 4. FUNCIÓN DESHACER ---
   deshacer() {
     if (this.historial.length > 0) {
       const ultimaFoto = this.historial.pop(); // Sacamos la última del historial

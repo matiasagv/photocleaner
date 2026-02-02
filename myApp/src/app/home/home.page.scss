@@ -3,7 +3,7 @@
   --background: #f8f9fa; // Gris muy suave
 }
 
-// BARRA SUPERIOR (ACTUALIZADA: Con botón de Álbumes)
+// BARRA SUPERIOR (Con botón de Álbumes)
 .top-bar {
   position: absolute;
   top: 40px; left: 20px; right: 20px;
@@ -51,12 +51,14 @@
 
 .photo-card {
   width: 100%; height: 100%; background: white; border-radius: 24px; overflow: hidden; box-shadow: 0 20px 40px -10px rgba(0,0,0,0.15); position: relative;
-  img { width: 100%; height: 100%; object-fit: cover; pointer-events: none; }
+  img { width: 100%; height: 100%; object-fit: cover; pointer-events: none; } // Pointer events none para que el swipe funcione mejor, PERO el click del zoom lo captura el padre si es necesario, o quitalo si falla el click.
+  // NOTA: Si el click del zoom no te funciona, cambia 'pointer-events: none' a 'pointer-events: auto'
   
   .card-overlay {
     position: absolute; bottom: 0; left: 0; width: 100%; height: 30%;
     background: linear-gradient(to top, rgba(0,0,0,0.6), transparent);
     display: flex; align-items: flex-end; padding: 20px;
+    pointer-events: none; // Para no bloquear clicks
   }
 }
 
@@ -68,7 +70,7 @@
   &.size-badge { background: rgba(255, 193, 7, 0.2); color: #ffca28; border-color: rgba(255, 193, 7, 0.3); }
 }
 
-// 5. BOTONES DE ACCIÓN (ACTUALIZADO: Con Rewind, Delete y Keep)
+// 5. BOTONES DE ACCIÓN
 .action-buttons {
   position: absolute; bottom: 30px; width: 100%; display: flex; justify-content: center; align-items: center; gap: 25px; z-index: 100;
 
@@ -76,13 +78,13 @@
     width: 64px; height: 64px; border-radius: 50%; border: none; background: white;
     display: flex; justify-content: center; align-items: center; font-size: 28px;
     box-shadow: 0 10px 20px rgba(0,0,0,0.1); transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); cursor: pointer;
-    ion-icon { font-size: 1em; pointer-events: none; } // Fix para que se vea el icono
+    ion-icon { font-size: 1em; pointer-events: none; } 
     &:active { transform: scale(0.9); }
 
     // BOTÓN REWIND (DESHACER - IZQUIERDA)
     &.rewind {
       width: 50px; height: 50px; font-size: 22px; 
-      color: #f39c12; // Naranja
+      color: #f39c12; 
       background: #fff;
       position: absolute; left: 30px;
       box-shadow: 0 5px 15px rgba(0,0,0,0.05);
@@ -95,6 +97,12 @@
     &.keep { color: #2ecc71; font-size: 32px; }
   }
 }
+
+// *** IMPORTANTE: FORZAR COLORES DE ICONOS ***
+// Esto arregla que se vean blancos
+.btn-action.rewind ion-icon { color: #f39c12 !important; }
+.btn-action.delete ion-icon { color: #ff4b4b !important; }
+.btn-action.keep ion-icon { color: #2ecc71 !important; }
 
 // 6. ESTILOS DE LA LISTA DE ÁLBUMES (MODAL)
 .album-item {
@@ -113,4 +121,27 @@
   }
   h3 { margin: 0; color: #333; font-weight: 700; }
   p { margin: 10px 0 20px; }
+}
+
+// 8. ESTILOS DEL ZOOM (PANTALLA COMPLETA)
+.zoom-content {
+  --background: black;
+  display: flex; flex-direction: column; height: 100%;
+}
+
+.zoom-container {
+  width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;
+  img { max-width: 100%; max-height: 100%; object-fit: contain; }
+}
+
+.close-zoom {
+  position: absolute; top: 20px; right: 20px; z-index: 999;
+  background: rgba(255,255,255,0.2); width: 40px; height: 40px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center; backdrop-filter: blur(5px);
+  ion-icon { color: white; font-size: 24px; }
+}
+
+.zoom-footer {
+  position: absolute; bottom: 30px; width: 100%; text-align: center;
+  p { color: rgba(255,255,255,0.7); font-size: 1rem; font-weight: 600; margin: 0; }
 }

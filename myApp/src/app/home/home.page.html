@@ -39,7 +39,8 @@
         [class.disabled-card]="i !== fotos.length - 1" 
       >
         <div class="photo-card">
-          <img [src]="foto.src" />
+          <img [src]="foto.src" (click)="abrirZoom(foto)" />
+          
           <div class="card-overlay">
             <div class="info-row">
               <div class="photo-badge size-badge">
@@ -89,6 +90,24 @@
             </ion-label>
           </ion-item>
         </ion-list>
+      </ion-content>
+    </ng-template>
+  </ion-modal>
+
+  <ion-modal [isOpen]="verZoom" (didDismiss)="verZoom = false">
+    <ng-template>
+      <ion-content class="zoom-content">
+        <div class="close-zoom" (click)="verZoom = false">
+          <ion-icon name="close"></ion-icon>
+        </div>
+        
+        <div class="zoom-container">
+          <img [src]="fotoZoom?.src" />
+        </div>
+
+        <div class="zoom-footer">
+          <p>{{ fotoZoom?.sizeStr }}</p>
+        </div>
       </ion-content>
     </ng-template>
   </ion-modal>
