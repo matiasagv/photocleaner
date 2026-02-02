@@ -1,15 +1,23 @@
-<ion-header>
-  <ion-toolbar color="primary">
-    <ion-title>Limpiador de Galería</ion-title>
-  </ion-toolbar>
-</ion-header>
-
-<ion-content [fullscreen]="true" class="ion-padding">
+<ion-content [fullscreen]="true" class="premium-bg">
   
+  <div class="top-bar">
+    <div class="logo">
+      <ion-icon name="sparkles" color="primary"></ion-icon>
+      <span>CleanGallery</span>
+    </div>
+    <div class="counter" *ngIf="fotos.length > 0">
+      {{ fotos.length }} restantes
+    </div>
+  </div>
+
   <div class="stack-container">
+    
     <div *ngIf="fotos.length === 0" class="empty-state">
-      <h3>¡No hay más fotos!</h3>
-      <p>Tu galería está limpia.</p>
+      <div class="circle-icon">
+        <ion-icon name="checkmark-done"></ion-icon>
+      </div>
+      <h3>¡Todo limpio!</h3>
+      <p>No quedan más fotos por revisar.</p>
     </div>
 
     <div 
@@ -22,11 +30,26 @@
     >
       <div class="photo-card">
         <img [src]="foto.src" />
-        <div class="info">
-          <h2>{{ foto.name }}</h2>
+        
+        <div class="card-overlay">
+          <div class="photo-badge">
+            <ion-icon name="image-outline"></ion-icon> Galería
+          </div>
         </div>
       </div>
     </div>
+  </div>
+
+  <div class="action-buttons" *ngIf="fotos.length > 0">
+    
+    <button class="btn-action delete" (click)="handleChoice('borrar', fotos[fotos.length - 1])">
+      <ion-icon name="trash-outline"></ion-icon>
+    </button>
+
+    <button class="btn-action keep" (click)="handleChoice('guardar', fotos[fotos.length - 1])">
+      <ion-icon name="heart"></ion-icon>
+    </button>
+
   </div>
 
 </ion-content>
