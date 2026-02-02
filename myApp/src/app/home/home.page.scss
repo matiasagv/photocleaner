@@ -1,27 +1,52 @@
-#container {
-  text-align: center;
+.stack-container {
+  position: relative;
+  width: 100%;
+  height: 80vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
 
+.card-wrapper {
   position: absolute;
-  left: 0;
-  right: 0;
-  top: 50%;
-  transform: translateY(-50%);
+  width: 90%;
+  height: 100%;
+  transition: transform 0.1s; /* Suavizar el arrastre */
+  
+  // Evitar que el usuario arrastre las cartas de abajo
+  &.disabled-card {
+    pointer-events: none; 
+    filter: brightness(0.9); // Efecto visual de profundidad
+  }
 }
 
-#container strong {
-  font-size: 20px;
-  line-height: 26px;
+.photo-card {
+  width: 100%;
+  height: 100%;
+  background: white;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+  display: flex;
+  flex-direction: column;
+
+  img {
+    flex: 1;
+    object-fit: cover;
+    pointer-events: none; // Importante para no interferir con el gesto
+  }
+
+  .info {
+    padding: 15px;
+    h2 {
+      margin: 0;
+      font-size: 1.2rem;
+      text-align: center;
+    }
+  }
 }
 
-#container p {
-  font-size: 16px;
-  line-height: 22px;
-
-  color: #8c8c8c;
-
-  margin: 0;
-}
-
-#container a {
-  text-decoration: none;
+.empty-state {
+  text-align: center;
+  color: #666;
 }
