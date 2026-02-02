@@ -13,11 +13,11 @@
   <div class="stack-container">
     
     <div *ngIf="fotos.length === 0" class="empty-state">
-      <div class="circle-icon">
-        <ion-icon name="checkmark-done"></ion-icon>
+      <div class="circle-icon" (click)="lanzarConfetti()"> <ion-icon name="checkmark-done"></ion-icon>
       </div>
       <h3>¡Todo limpio!</h3>
-      <p>No quedan más fotos por revisar.</p>
+      <p>Has recuperado espacio en tu celular.</p>
+      <ion-button fill="clear" (click)="cargarFotosReales()">Cargar más fotos</ion-button>
     </div>
 
     <div 
@@ -32,8 +32,10 @@
         <img [src]="foto.src" />
         
         <div class="card-overlay">
-          <div class="photo-badge">
-            <ion-icon name="image-outline"></ion-icon> Galería
+          <div class="info-row">
+            <div class="photo-badge size-badge">
+              <ion-icon name="server-outline"></ion-icon> {{ foto.sizeStr }}
+            </div>
           </div>
         </div>
       </div>
@@ -42,6 +44,10 @@
 
   <div class="action-buttons" *ngIf="fotos.length > 0">
     
+    <button class="btn-action rewind" (click)="deshacer()" [disabled]="historial.length === 0">
+      <ion-icon name="refresh"></ion-icon>
+    </button>
+
     <button class="btn-action delete" (click)="handleChoice('borrar', fotos[fotos.length - 1])">
       <ion-icon name="trash-outline"></ion-icon>
     </button>
