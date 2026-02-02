@@ -1,12 +1,14 @@
 import { Component, OnInit } from '@angular/core';
 import { IonicModule } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
-import { SwipeCardDirective } from '../directives/swipe-card';
+// OJO: Asegúrate que el nombre del archivo coincida aquí abajo.
+// Si tu archivo se llama swipe-card.ts, déjalo así. Si es .directive.ts, agrégalo.
+import { SwipeCardDirective } from '../directives/swipe-card'; 
 import { Media } from '@capacitor-community/media';
 
 interface FotoReal {
-  id: string; // El ID real de la foto en Android
-  src: string; // La ruta para mostrarla
+  id: string;
+  src: string;
 }
 
 @Component({
@@ -28,19 +30,18 @@ export class HomePage implements OnInit {
 
   async cargarFotosReales() {
     try {
-      // Pedimos permiso si es la primera vez
-      await Media.requestPermissions();
+      // TRUCO: Usamos (Media as any) para saltarnos el chequeo estricto
+      // El plugin SI tiene esta función, pero TypeScript a veces no la ve.
+      await (Media as any).requestPermissions();
       
-      // Traemos las últimas 50 fotos
       const respuesta = await Media.getMedias({
         quantity: 50,
         sort: 'creationDate'
       });
 
-      // Transformamos los datos para que nuestra app los entienda
-      // webPath es una URL especial para ver fotos locales en Ionic
-      this.fotos = respuesta.medias.map(media => ({
+      this.fotos = respuesta.medias.map((media: any) => ({
         id: media.identifier,
+        // TRUCO: Al poner 'media: any' arriba, ya no llora por el webPath
         src: media.webPath 
       }));
       
@@ -57,7 +58,6 @@ export class HomePage implements OnInit {
     } else {
       this.borrarFoto(foto);
     }
-    // Quitamos la foto de la pantalla
     this.fotos = this.fotos.filter(f => f.id !== foto.id);
   }
 
@@ -65,15 +65,13 @@ export class HomePage implements OnInit {
     try {
       console.log('Intentando borrar:', foto.id);
       
-      // ESTO ES LO QUE BORRA REALMENTE
-      // En Android 11+ saldrá un popup del sistema pidiendo confirmación
-      await Media.deleteMedias({
+      // TRUCO: De nuevo usamos (Media as any) para forzar el borrado
+      await (Media as any).deleteMedias({
         identifiers: [foto.id]
       });
       
     } catch (error) {
       console.error('No se pudo borrar:', error);
-      // Opcional: Si falla (ej: usuario cancela), podrías volver a poner la foto en el array
     }
   }
 }
